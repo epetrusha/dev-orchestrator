@@ -14,6 +14,10 @@ The layer vocabulary used by verification-matrix rows (`dev-writing-plan` step 5
 
 Adapt this set to your stack — e.g. swap `engine`/`content` for `db`, `queue`, `cli` — and keep this section as the single declaration; the matrix author and reviewer validate rows against the set declared here.
 
+## Prove harness
+
+Default: **none** — the orchestrator runs the Prove pass inline per `.claude/skills/dev-orchestrator/references/prove-discipline.md`. A project with its own verification-harness skill declares it here by name; the orchestrator then invokes that skill at the Prove phase under the same contract (surface everything, fix nothing, one structured report per scenario). Declaring a harness is optional — inline is the complete default.
+
 ## What to use when
 
 _Add project-specific test layers, harnesses, and helpers here as the codebase grows._

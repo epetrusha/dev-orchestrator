@@ -44,6 +44,8 @@ Verification-matrix rows are held to strictness rules that make hollow coverage 
 
 A list of **forbidden rationales** ("pre-existing", "covered elsewhere", "math is unit-tested", "will file in BACKLOG later") acts as tripwires: if one appears in the agent's own reasoning, it must stop and surface the decision instead of self-deferring. Deferral is a user decision, never the agent's.
 
+The pass itself follows a written discipline reference: prep that *produces* outputs (per-scenario assertion shapes, an architecture-sufficiency argument) rather than just "I read it," anomaly recognition beyond planned assertions ("did I see something off?", not "did my assertion catch it?"), a per-scenario report template, and a red-flags table. Projects with their own verification harness can declare it in `docs/TESTING.md` and the orchestrator dispatches to it under the same contract — optional; inline is the complete default.
+
 ### Grounding gates
 
 Claims are cheap and the suite prices them accordingly. Doc reading requires **quote evidence** — a load-bearing line cited per document, not "I read it." Claims about existing code require `file:line` citations, *and* the spec self-review audits them for the subtler failure: a citation that's real but wrong about what the code does. External systems (an API, a standard, a game ruleset) get a ground check against canonical sources before design starts — never from the user's paraphrase or the model's memory. And questions the codebase can answer are answered by grep before they cost a user turn.
@@ -105,6 +107,7 @@ See [`CLAUDE.md`](CLAUDE.md) for the full rule set and [`docs/planning/INDEX.md`
 | Domain doc set the brainstorm reads | `CLAUDE.md` §Documentation map | INVARIANTS / TESTING / BACKLOG / GLOSSARY + your domain docs |
 | Core/extension declaration | `docs/GLOSSARY.md` | none (plugin gates close as N/A) |
 | Knowledge base location (session history + learnings) | `CLAUDE.md` §Knowledge base | in-project `docs/knowledge/`; point at an external vault or set `none` |
+| Prove harness skill | `docs/TESTING.md` §Prove harness | none — inline Prove pass; declare a project harness skill to dispatch to it |
 | Reasoning discipline references | `.claude/skills/dev-orchestrator/references/` | shipped; your global `~/.claude/CLAUDE.md` layers on top |
 
 ## Cost caveat

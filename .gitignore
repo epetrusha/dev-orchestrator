@@ -11,3 +11,4 @@ _setup_*.log
 
 # Machine-local tooling
 tools/sync-global-skills.sh
+tools/diff-source-skills.sh

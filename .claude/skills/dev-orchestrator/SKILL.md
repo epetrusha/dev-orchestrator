@@ -79,7 +79,7 @@ Skip this phase when the user request is explicit with clear scope (concrete tas
 
 1. **One sentence.** `User wants X; current state is Y; I will change Z.`
 2. **Map the boundary.** Every file, API event, UI component, test, and doc section that must change. Think in flows: `source of truth → shared → server → transport → client → UI`.
-3. **Declare orchestration.** Re-read project `CLAUDE.md` §When to orchestrate vs stay inline. >3 files = orchestrate. Per file: `path → inline | subagent (reason)`.
+3. **Declare orchestration.** Re-read project `CLAUDE.md` §When to orchestrate vs stay inline. >3 files = orchestrate. Per file: `path → inline | subagent (reason, model tier)`. Model tier: default `sonnet`; `haiku` for mechanical work; `opus` (or inline) only for design/architecture. Never default to `opus`.
 
 Detailed doc-reading + three-seats + plugin-independence audit happen inside `dev-brainstorm` (next phase). The Scope artifact at this layer is just the boundary sketch + orchestration declaration. Do NOT skip ahead and start drafting spec content here.
 
@@ -155,7 +155,11 @@ The cycle is bidirectional. Explicit assent without a plan-file update is also i
 
 **Deliverable:** Evidence per behavior, not claims. Re-read §Communication before drafting the user-facing report.
 
-Run the Prove pass inline. Pick the cheapest layer that proves the user's actual chain end-to-end: unit tests for pure logic, integration/API tests for handler flow, a UI/end-to-end pass for anything the user clicks. Plan the pass first — a checklist of user-action sequences with expected outcomes, one TodoWrite item each — seed any non-deterministic inputs upfront, then execute, capture everything, and write a structured report per scenario. Core principle: **end-to-end or it didn't happen; surface every issue; claim nothing without the cited evidence (test output, screenshot, observed state) that proves it.**
+Re-read [`references/prove-discipline.md`](references/prove-discipline.md) before planning the pass — it owns the operational detail: mandatory prep with PRODUCE outputs (per-scenario assertion shape, architecture sufficiency, applicable gotchas), pass planning, variant escalation, anomaly recognition, the per-scenario report template, and the red-flags table.
+
+**Project harness extension point (optional).** If the project declares a verification-harness skill in `docs/TESTING.md` §Prove harness, invoke that skill for the pass instead of executing inline — it owns the same contract (surface everything, fix nothing, one structured report per scenario). No declaration → run the Prove pass inline per the discipline reference. The harness is never a requirement; inline is the complete default.
+
+Run the pass: pick the cheapest layer that proves the user's actual chain end-to-end: unit tests for pure logic, integration/API tests for handler flow, a UI/end-to-end pass for anything the user clicks. Plan the pass first — a checklist of user-action sequences with expected outcomes, one TodoWrite item each — seed any non-deterministic inputs upfront, then execute, capture everything, and write a structured report per scenario. Core principle: **end-to-end or it didn't happen; surface every issue; claim nothing without the cited evidence (test output, screenshot, observed state) that proves it.**
 
 Keep verifying and fixing separate: capture and report every issue first, then decide what to fix, fix inline (per project `CLAUDE.md` — fix-in-same-session policy), and re-run the affected scenarios. Mid-pass fixing hides bugs — a patch lands on one symptom while the same pass surfaced others that go unrecorded. Continue until the user signals stop or every required outcome is confirmed.
 

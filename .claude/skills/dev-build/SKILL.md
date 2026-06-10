@@ -23,7 +23,7 @@ Any change to plan, scope, file map, or verification matrix → STOP, surface to
 
 2. **Load TodoWrite from plan.** EVERY plan item (code tasks, verification matrix rows, docs updates, commit/push) becomes a todo. Items not in TodoWrite get dropped silently.
 
-3. **Declare orchestration per task.** `inline | subagent (which subagent, model tier)`.
+3. **Declare orchestration per task.** `inline | subagent (which subagent, model tier)`. **Model tier: default `sonnet`. Use `haiku` for straightforward/mechanical briefs (doc edits, boilerplate, wiring a fully-specified change). Reserve `opus` for design/architecture or genuinely hard reasoning — and prefer doing that inline. Never default to `opus`.**
 
 4. **Dispatch subagents per plan's authored brief.** Briefs were authored in writing-plan (Task body). Don't re-author. Verify the brief includes exact paths for any spec/plan/code the subagent must read.
 

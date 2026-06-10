@@ -1,0 +1,13 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Temp setup artifacts
+_setup_*.ps1
+_setup_*.log
+
+# Machine-local tooling
+tools/sync-global-skills.sh

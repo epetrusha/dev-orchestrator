@@ -143,6 +143,7 @@ Plans/specs live under `docs/planning/`. Folder placement is authoritative.
 - `plans/abandoned/`, `specs/abandoned/` — add a "why, successor" note before moving.
 - `investigations/` — `dev-investigate` findings (handoff into `dev-brainstorm`).
 - `reviews/` — `dev-reviewer` output for specs and plans.
+- `orchestration/` — `dev-external-agent` run records + `external-agent-playbook.md` (per-run learnings).
 - `handoffs/` — append-only session notes.
 - `INDEX.md` — active items + latest handoff. Read first when starting; update when files move.
 

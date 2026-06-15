@@ -33,7 +33,7 @@ No code edits, no plan-writing, no subagent dispatch while in investigate phase.
 ## Output artifact
 
 - **Simple investigations** (single hypothesis, quick read): findings inline in chat.
-- **Complex investigations** (multi-file, multi-hypothesis, design implications): write to `docs/planning/investigations/YYYY-MM-DD-<symptom>.md`. This file is read by `dev-brainstorm`'s Read-project-context step as a doc to incorporate.
+- **Complex investigations** (multi-file, multi-hypothesis, design implications): write to `docs/planning/investigations/YYYY-MM-DD-<symptom>.md`. This file is read by `dev-brainstorm`'s Ground step (code-first grounding) as a doc to incorporate.
 
 Frontmatter for investigation files:
 

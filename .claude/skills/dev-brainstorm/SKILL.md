@@ -1,11 +1,11 @@
 ---
 name: dev-brainstorm
-description: "Use before any creative work — new features, behavior changes, refactors with design decisions, new mechanics, UI flows, data shape changes. Produces a spec in docs/planning/specs/active/ via a TodoWrite-tracked checklist with quote-evidence gating, three-seats output, and plugin-independence audit. dev-writing-plan consumes the result. Do NOT load for: explicit pre-planned tasks, mid-execution work, verification, session-wrap."
+description: "Use before any creative work — new features, behavior changes, refactors with design decisions, new mechanics, UI flows, data shape changes. Produces a spec in docs/planning/specs/active/ via a TodoWrite-tracked checklist with quote-evidence gating, three-seats output, and abstraction & reuse audit. dev-writing-plan consumes the result. Do NOT load for: explicit pre-planned tasks, mid-execution work, verification, session-wrap."
 ---
 
 # Dev Brainstorm
 
-Turn an idea into a spec through dialogue, with project grounding and plugin-independence enforcement.
+Turn an idea into a spec through dialogue, grounded in code and encoded at the right abstraction level.
 
 <HARD-GATE>
 No implementation, no plan-writing, no subagent dispatch until a spec exists AND the user explicitly approves it. Engagement is not approval; only `yes`/`approved`/`proceed` clears the gate.
@@ -17,87 +17,76 @@ Every change goes through this. The spec can be short. Skipping is where the mos
 
 ## Checklist (TodoWrite-tracked, in order)
 
-1. **Brainstorm-entry priming.** Before any tool use, produce a chat-visible priming output applying entries tagged `brainstorm-entry`, `brainstorm-iteration`, and `fix-iteration` (if this is a fix cycle) from `.claude/skills/dev-orchestrator/references/priming-anti-patterns.md`. Same format as orchestrator session-entry priming: marker `**Priming**` + name + signal + countermove per applicable entry. "No applicable" requires enumeration.
+1. **Brainstorm-entry priming.** Before any tool use, produce chat-visible priming for entries tagged `brainstorm-entry`, `brainstorm-iteration`, `fix-iteration` (fix cycles) in `.claude/skills/dev-orchestrator/references/priming-anti-patterns.md`. Format: `**Priming**` + name + signal + countermove. "No applicable" requires enumeration.
 
 2. **Restate user intent in one sentence.** Ambiguous? Ask before exploring.
 
-3. **Read project context.** One TodoWrite item per relevant doc; close each only with a quoted load-bearing line. Always: INVARIANTS, BACKLOG, GLOSSARY; TESTING for verification work; plus the project's domain docs from the `CLAUDE.md` Documentation map matched to the work (e.g. a mechanics doc for behavior changes, a UI-layout doc for UI work, interface manifests for API or shared-code changes). Inapplicable docs close as `N/A: <reason>`.
+3. **Ground in the primary source — code + config; docs are the index.** Code is the truth; a doc is a description that drifts (this is the orchestrator §Grounding rule, applied here). Output: the spec's Project-context section.
+   - **Docs locate, code confirms.** Use the project's `CLAUDE.md` Documentation map to find which docs bear on this work, and read those — let the task decide, don't read a fixed list. Start with the core: the domain docs covering this topic, and the ADRs/invariants that record the codebase's design decisions and constraints. Then whatever the task calls for — a testing doc for verification work; a glossary only when terms are unfamiliar. One TodoWrite item per relevant doc; inapplicable → `N/A: <reason>`. Then **read the actual code/config those point to** and confirm what it does, including the path that actually runs it, not just the data shape. Close each item with a quoted line. Behavior claims cite the **code** `file:line` (primary), not docs. Verify every `file:line` by reading it this session — stale anchors misread downstream. Read any matching `docs/planning/investigations/` handoff too (the `dev-investigate` artifact); skip items it already covers. A source read earlier this session counts; don't re-quote unnecessarily.
+   - **External sources.** When the subject names an external system/product/standard ("Stripe's webhook spec", "the OAuth 2.0 RFC", "a third-party REST API", "the iCalendar standard"), the spec MUST carry a "Project context — external sources" sub-section: cited URLs + claims from the source, not paraphrase or memory. WebFetch/WebSearch before drafting. Else `No external sources apply — <why>`.
+   - **Posture.** The Project-context header declares grounding once ("grounded this session, verified by reading"); claims default to verified-by-reading-the-source, and any claim NOT read this session is inline-tagged `[assumed]` or `[secondary: <source>]` (a doc-only behavior claim is `[secondary: <doc>]` until confirmed against code). Marking the exceptions beats tagging every line.
 
-   If `docs/planning/investigations/` contains a recent investigation file related to this task (matched by symptom or date), read it as one of the relevant docs — it's the handoff artifact from `dev-investigate`. Skip TodoWrite items for docs already covered by the investigation.
+4. **Apply mental models — grounded.** The orchestrator §Challenge already challenged the *framing* early (pre-grounding, broad). Here you apply 5–7 load-bearing models to the now-grounded specifics: per model, where it bites in THIS task (the file / decision / option it touches) and what it changes about the obvious-feeling design (the alternative it surfaces). A bare name-list fails. Produces the spec's `Mental models applied` section — it requires the docs/code from step 3, which is why it lands here, not at §Challenge.
 
-   Prior-read citations: if a canonical doc was already read earlier this session, citing the prior read counts as evidence. Don't re-quote unnecessarily.
+5. **Frame + scope questions.**
+   - **Three-seats** (one sentence each): **User** — what changes for the user; **Data-flow** — source → shared → server → transport → client → UI; **Abstraction** — right level of generality, could another consumer use the same pattern? *Provisional here* — the abstraction & reuse audit (step 7) finalizes this verdict.
+   - **Scope-only clarifying questions** — one at a time, multiple-choice when discrete. Ground (step 3) already read the code — a question the code answers is not a user question; resolve it from your grounding (or a quick extra Grep/Read against the codebase or project docs) and move on. Surface only what genuinely isn't in code, docs, or sources: the user's intent, taste, or risk call — a fact is never a user question. The `file:line` evidence lives in the spec for the plan-author, not in the question — the user needs the decision, not the citation. Design-trade questions ("variant A or B of the mechanic?") are NOT asked here — they belong in the step-6 dialogue, once approaches exist.
 
-4. **Three-seats output** (one sentence each, required in spec):
-   - **User seat:** what the user experiences differently
-   - **Data-flow seat:** where the change propagates (source → shared → server → transport → client → UI)
-   - **Abstraction seat:** is this the right level of generality? Could a different plugin use the same pattern?
+6. **Design dialogue (iterative loop).**
+   - **Trace the lived path first** (orchestrator self-check): walk one real use end to end across every layer (source → shared → server → transport → client → UI), and let it redesign. Its success + failure signals, each at a named layer, become step-8 acceptance criteria. No emitted signal on success or bad input = design gap; close it now.
+   - **Propose 2–3 approaches**, recommendation first. Judge each through the abstraction & reuse lens as you propose — the recommendation must already reuse-not-duplicate and keep shared essence in one home. You cannot recommend a duplicating or case-fusing approach and audit it after; the audit (step 7) only records a judgment already made here.
+   - **Design-trade questions** surface here (code-checked first).
+   - **Present design sections one at a time; per-section assent.**
+   - **Record** chosen + ≥1 structurally-different rejected approach into `Approaches considered`.
 
-5. **External-source ground check.** When the brainstorm subject names an external system, product, game, or standard (e.g., "Stripe's webhook spec", "the OAuth 2.0 RFC", "a third-party REST API", "an Excel formula", "the iCalendar standard"), the spec MUST include a "Project context — external sources" sub-section with cited URLs + load-bearing claims drawn from the source material, NOT from the user's paraphrase or the agent's memory. WebFetch / WebSearch the canonical sources before drafting design sections. Skip with explicit `No external sources apply — <one-line justification>` when nothing external is referenced. Failure mode this prevents: anchoring on the user's enumeration of features and missing canonical mechanics that should drive design decisions.
+7. **Abstraction & reuse audit** (when the spec introduces a primitive, module, type, or named definition another part of the system builds on; else `audit N/A`). Run it per `.claude/skills/dev-orchestrator/references/review-gates/abstraction-and-reuse.md` and document under `## Abstraction & reuse audit`; the reviewer gate enforces the procedure and principle, so don't restate them. Brainstorm-specific: this finalizes the step-5 abstraction seat.
 
-6. **Ask clarifying questions, one at a time.** Multiple choice when options are discrete. **Before asking: check the codebase first.** If the question is answerable by Grep / Read against the codebase or project docs, do that first and cite `file:line` in the answer rather than asking. Only surface questions whose answers genuinely aren't in code, docs, or external sources. Failure mode this prevents: burning user turns on questions the agent could have answered itself with a grep.
+8. **Write the spec** → `docs/planning/specs/active/YYYY-MM-DD-<topic>.md`, frontmatter `Status: Awaiting Plan`. Sections: Intent, Three-seats, Mental models applied, Project context, Design, Approaches considered, Abstraction & reuse audit (or N/A), Acceptance criteria, Out of scope. Commit `docs: spec <topic>`.
+   AC are Yes/No verifiable and name the observable signal (log line, event, record, rendered state). Include ≥1 failure-path criterion (bad input → an error signal + a structured log line, no state mutation). Banned: "works correctly", "feels right", "looks good", "handles edge cases", "as appropriate".
 
-7. **Propose 2-3 approaches.** Lead with recommendation and why.
-
-8. **Present design sections one at a time.** Get approval per section.
-
-9. **Plugin-independence audit** (when introducing core vocabulary — names registered in the core that extensions consume: event types, op names, status types, registry entries, label keys, template names, selectors). Applies only when the project has a core/extension split (plugins, rulesets, providers, themes, tenants) with the extension directory declared in `CLAUDE.md` or `GLOSSARY.md`; no declared split → close as `No core/extension split — audit N/A`.
-
-   - Inventory extension-specific terms by reading every extension in the declared extension directory — its manifest/config, any definition files, locale bundles, any other file introducing named primitives.
-   - For each proposed core name: if it matches or references a term meaningful in only some extensions, it's leaking. Replace with a generic primitive + extension-supplied label/data.
-   - Document the audit in the spec under `## Plugin-independence audit`: one entry per proposed name → verdict (generic | leaks from `<extension-id>`) → resolution.
-
-   Skip with explicit `No engine vocabulary added — audit N/A` when nothing introduced.
-
-   Principle: the core and global templates never contain a noun, label, or short-code meaningful in only a subset of extensions. Adding a new extension must require only authoring its own config/data files — never editing the core.
-
-10. **Write the spec** to `docs/planning/specs/active/YYYY-MM-DD-<topic>.md`. Frontmatter `Status: Awaiting Plan`. Sections: Intent, Three-seats output, Project context (quoted evidence summary), Design, Plugin-independence audit (or explicit N/A), Acceptance criteria (concrete user-action sequences), Out of scope. Commit as `docs: spec <topic>`.
-
-   Each acceptance criterion is Yes/No verifiable. Banned phrases: "works correctly", "feels right", "looks good", "handles edge cases", "as appropriate". Self-review step greps for them.
-
-11. **Spec self-review.** Fix inline, no re-review loop:
-    - Placeholder scan: `TBD`, `TODO`, `fill in`, `details to follow`, `Similar to <other>`, `Add appropriate <X>`, `handle edge cases`
-    - Internal consistency
-    - Scope check — decompose if multi-subsystem; declare backend/frontend split if it spans both
-    - Ambiguity check — any requirement interpretable two ways? Pick one
-    - Copout scan: `pre-existing`, `out of scope` (unjustified), `covered elsewhere`, `engine-proven`, `math is unit-tested`
-    - **Engine-state claim audit**: grep the spec for phrases like "the engine already supports", "X exists today", "this is already wired", "the existing Y handles Z". Every such claim MUST have an inline `file:line` citation immediately adjacent — AND, when the design *relies on* that behavior, the cited code must have been read and confirmed to do what the claim says. **A present citation is not verification:** a real `file:line` can still be wrong about what the code does (e.g. claiming a handler writes a record when it actually validates and rejects on a precondition; claiming in-memory state survives restart when it is transient by design). For load-bearing claims, confirm the *execution path* that runs it (pure shared op vs server-deferred vs fallthrough), not just the data shape. Tag each load-bearing claim verified-by-reading vs assumed. Memory-fabricated **and citation-present-but-false** claims are the recurring failure mode.
-    - **Acceptance criteria layer check**: AC steps describe observable outcomes ("the activity log shows a `discount=0.5` entry", "the account header reflects `credits=200`"), NOT executable test-code snippets (`expect(x).toBe(y)`). Test code belongs to the writing-plan / build phase where the test framework's APIs are verified. Inlining test code in a spec pushes the plan-author into authoring matching code based on unverified API assumptions.
+9. **Spec self-review** (fix inline):
+   - Placeholders: `TBD`, `TODO`, `fill in`, `details to follow`, `Similar to <other>`, `Add appropriate <X>`.
+   - Required sections present: `Mental models applied`, `Approaches considered`, `Abstraction & reuse audit` (or its explicit N/A).
+   - Internal consistency; decompose if multi-subsystem (declare backend/frontend split).
+   - Ambiguity: any requirement readable two ways → pick one.
+   - Copouts: `pre-existing`, unjustified `out of scope`, `covered elsewhere`, `engine-proven`, `math is unit-tested`.
+   - **Engine-state claims** ("already supports", "exists today", "already wired"): each needs an adjacent code `file:line`, and if the design relies on it, the code must have been read and confirmed — a citation is not verification (a real line can validate-and-reject where you assumed it writes; in-memory state can be transient where you assumed it persists). Flag any behavior claim still tagged `[secondary]`.
+   - **AC layer**: steps are observable outcomes, not test code (`expect(...)`).
 
 <HARD-GATE>
 Dispatch the `dev-reviewer` agent for the spec just written:
 
 - artifact-path: the spec file path just written
 - artifact-type: `spec`
-- reviews-output-path: `docs/planning/reviews/<slug>-spec.md` (where `<slug>` is the spec filename basename)
+- reviews-output-path: `docs/planning/reviews/<slug>-spec.md` (`<slug>` = spec filename basename)
 - references-base: `.claude/skills/dev-orchestrator/references/review-gates/`
 
-Read the resulting reviews file. The `**Status:**` line gates progress:
-
-- `**Status:** approved` → proceed to step 12.
-- `**Status:** rejected` → read the cited violations, fix the spec inline, re-dispatch the reviewer. Loop until approved.
-
-The reviewer's neutrality is structural (fresh agent context). Do not skip the dispatch; do not self-review in place of dispatch.
+Read the reviews file. `**Status:** approved` → step 10. `**Status:** rejected` → fix inline, re-dispatch, loop until approved. Do not self-review in place of dispatch (neutrality is the fresh context).
 </HARD-GATE>
 
-12. **Present spec for user review.** Single-content message: "Spec written and committed to `<path>`. Please review before we move to writing the plan." Wait for explicit approval.
+10. **Present spec for user review.** "Spec written and committed to `<path>`. Please review before we move to the plan." Wait for explicit approval; changes loop to step 6.
 
-13. **Spec approved.** After the user approves, note the approved spec path for writing-plan (the plan inherits the spec's slug — the filename basename, e.g. `2026-05-25-foo`).
+11. **Spec approved.** Note the spec path for writing-plan (plan inherits the slug).
 
-14. **Transition to dev-writing-plan.** Terminal state. No other skill invoked.
+12. **Transition to dev-writing-plan.** Terminal.
 
 ## Process flow
 
 ```dot
 digraph dev_brainstorm {
-  "Restate intent" -> "Read docs (quote evidence)" -> "Three-seats output" ->
-  "Clarifying Qs (one at a time)" -> "Propose 2-3 approaches" ->
-  "Present design sections" -> "Plugin-independence audit" -> "Write spec" ->
-  "Spec self-review" -> "User reviews spec?" [shape=diamond];
-  "User reviews spec?" -> "Write spec" [label="changes"];
+  "Restate intent" -> "Ground (code-first)" -> "Mental models" ->
+  "Frame: three-seats + scope Qs" -> "Design dialogue (loop)";
+  "Design dialogue (loop)" -> "Design dialogue (loop)" [label="lived-path / propose / lens / sections"];
+  "Design dialogue (loop)" -> "Capture audit" -> "Write spec" -> "Self-review" ->
+  "Reviewer gate" [shape=diamond];
+  "Reviewer gate" -> "Self-review" [label="rejected"];
+  "Reviewer gate" -> "User reviews spec?" [label="approved"];
+  "User reviews spec?" [shape=diamond];
+  "User reviews spec?" -> "Design dialogue (loop)" [label="changes"];
   "User reviews spec?" -> "Invoke dev-writing-plan" [label="approved"];
 }
 ```
 
 ## Cross-cutting rules
 
-Communication discipline, engagement-vs-approval, hard-correction handling, length ceilings, jargon discipline — defined in `dev-orchestrator`. Re-read that block before every user-facing message.
+Communication, engagement-vs-approval, hard-correction handling, length ceilings, jargon discipline — defined in `dev-orchestrator`. Re-read before every user-facing message.

@@ -34,7 +34,7 @@ Hard gates between phases: no spec without scope approval, no plan without spec 
 
 Specs and plans are reviewed by a fresh-context subagent (`dev-reviewer`) that applies shared review-gate files and returns a written verdict — reject means fix and re-dispatch until approved. The verification matrix is authored by a second independent agent (`dev-writing-verification`), because a plan author grading its own verification rows is the writer-grades-own-homework anti-pattern. Neutrality isn't a prompt instruction; it's structural — the reviewer has no access to the authoring context that rationalized the shortcuts.
 
-The gates themselves (`triad`, `placeholder-and-copout`, `matrix-row-strictness`, `forbidden-rationales`, `plugin-independence`) are standalone vocabulary files consumed by both the authoring skills and the reviewer — one canonical statement of each rule, no drift between what the author checks and what the reviewer enforces.
+The gates themselves (`triad`, `placeholder`, `matrix-row-strictness`, `forbidden-rationales`, `abstraction-and-reuse`) are standalone vocabulary files consumed by both the authoring skills and the reviewer — one canonical statement of each rule, no drift between what the author checks and what the reviewer enforces.
 
 ### Proof, not claims
 
@@ -94,7 +94,7 @@ CLAUDE.md                   — project rules the skills reference
 1. Copy `.claude/` (skills + agents), `CLAUDE.md`, and the `docs/` scaffold into your project root.
 2. Adapt `CLAUDE.md`'s Documentation map to your project's domain docs.
 3. Declare your verification layer set in `docs/TESTING.md` §Verification layers (a default ships there).
-4. If your project has a core/extension split (plugins, providers, themes), declare the extension directory in `docs/GLOSSARY.md` — the plugin-independence gate keys off it. No split → those gates close as N/A.
+4. If your project has a core/extension split (plugins, providers, themes), declare the extension directory in `docs/GLOSSARY.md`. No split → skip this step.
 5. Invoke the `dev-orchestrator` skill before any implementation task. It classifies the work and chains the subskills.
 
 See [`CLAUDE.md`](CLAUDE.md) for the full rule set and [`docs/planning/INDEX.md`](docs/planning/INDEX.md) to orient at the start of a session.

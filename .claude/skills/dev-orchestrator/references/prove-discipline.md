@@ -8,6 +8,8 @@ End-to-end or it didn't happen. A pass is only meaningful if it traces the user'
 
 Verify and fix stay separate. The pass surfaces every issue; fixing happens after the report, then the affected scenarios re-run. Mid-pass fixing hides bugs: a patch lands on one symptom while the same pass surfaced four others that go unrecorded.
 
+When verification surfaces an off-rails signal — the design is contradicted, a planned premise proves false, or the same step fails twice (`dev-orchestrator §Off-rails`) — that is a report item, not a patch or a workaround. Surface it so the orchestrator runs the drill; verification never free-hands a fix.
+
 ## Mandatory prep — produce, don't just read
 
 Before any setup or execution:

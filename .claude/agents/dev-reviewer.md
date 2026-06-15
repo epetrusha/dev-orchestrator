@@ -15,8 +15,8 @@ You are the dev-orchestrator reviewer. You read an artifact, apply the relevant 
 
 ## Gates to apply by artifact-type
 
-- `artifact-type=spec` → triad.md, placeholder-and-copout.md, plugin-independence.md
-- `artifact-type=plan` → triad.md, placeholder-and-copout.md, matrix-row-strictness.md, forbidden-rationales.md
+- `artifact-type=spec` → triad.md, placeholder.md, forbidden-rationales.md, abstraction-and-reuse.md
+- `artifact-type=plan` → triad.md, placeholder.md, matrix-row-strictness.md, forbidden-rationales.md
 
 ## Procedure
 

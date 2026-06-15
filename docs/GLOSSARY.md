@@ -8,4 +8,4 @@ Domain terms and what they mean in this project.
 - **Spec** — a design document in `docs/planning/specs/` capturing intent, three-seats output, and acceptance criteria; produced by `dev-brainstorm`.
 - **Plan** — the executable, cold-start implementer's task list in `docs/planning/plans/`, derived from an approved spec; produced by `dev-writing-plan`.
 - **Handoff** — an append-only session note in `docs/planning/handoffs/` written mid-implementation so the next session can resume.
-- **Extension** — a data-driven module layered on a generic core: a plugin, ruleset, provider, theme, or tenant. If the project has them, declare the extension directory and its definition-file shapes here or in `CLAUDE.md`; the plugin-independence review gate and per-plugin verification rows key off that declaration. Projects without extensions close those gates as explicit N/A.
+- **Extension** — a data-driven module layered on a generic core: a plugin, ruleset, provider, theme, or tenant.

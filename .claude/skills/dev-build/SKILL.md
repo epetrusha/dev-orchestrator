@@ -23,7 +23,7 @@ Any change to plan, scope, file map, or verification matrix → STOP, surface to
 
 2. **Load TodoWrite from plan.** EVERY plan item (code tasks, verification matrix rows, docs updates, commit/push) becomes a todo. Items not in TodoWrite get dropped silently.
 
-3. **Declare orchestration per task.** `inline | subagent (which subagent, model tier)`. **Model tier: default `sonnet`. Use `haiku` for straightforward/mechanical briefs (doc edits, boilerplate, wiring a fully-specified change). Reserve `opus` for design/architecture or genuinely hard reasoning — and prefer doing that inline. Never default to `opus`.**
+3. **Load the plan's orchestration.** Take the per-task `inline | subagent + model tier` from the plan's file map; don't re-derive it. A task the plan left without a tier is a plan gap → surface it before dispatching.
 
 4. **Dispatch subagents per plan's authored brief.** Briefs were authored in writing-plan (Task body). Don't re-author. Verify the brief includes exact paths for any spec/plan/code the subagent must read.
 
@@ -33,7 +33,7 @@ Any change to plan, scope, file map, or verification matrix → STOP, surface to
 
 7. **Capture verification matrix evidence inline.** Each row's done-check evidence (script output, screenshot path, test count) goes into the TodoWrite closure for that row.
 
-8. **On test failure or any plan deviation:** STOP. Re-read project CLAUDE §Degradation prevention + `.claude/skills/dev-orchestrator/references/cognitive-discipline.md`. Surface to user before iterating.
+8. **Stay on the plan; on test failure or any plan deviation, STOP.** Default is to execute the approved plan as written — its design choices were settled in planning + review; do not relitigate them mid-build. When you go off-rails (triggers + 4-step drill: `dev-orchestrator §Off-rails`), STOP and run that drill — the contact-with-reality surfacing it produces ("can't do A because X/Y" / "advise B over A because Z") is the only sanctioned deviation from the plan. Re-read project CLAUDE §Degradation prevention + `.claude/skills/dev-orchestrator/references/cognitive-discipline.md`. Surface to user before iterating.
 
 9. **Transition to the Prove pass** (verification) — see the orchestrator's §Prove.
 

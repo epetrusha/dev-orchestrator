@@ -25,7 +25,7 @@ Plan document only. No code, no subagent dispatch, no implementation. Implementa
 
 2. **Scope check.** Multi-subsystem → recommend decomposing. Touches engine + UI → declare backend/frontend phase split (ideally separate sessions).
 
-3. **File map.** Enumerate every file: exact path | inline-or-subagent | one-line responsibility. `>3 files = orchestrate` per project CLAUDE.
+3. **File map.** Enumerate every file: exact path | inline-or-subagent | model tier (subagent only) | one-line responsibility. `>3 files = orchestrate` per project CLAUDE. **Model tier: default `sonnet`; `haiku` for straightforward/mechanical work (doc edits, boilerplate, wiring a fully-specified change); reserve `opus` for design/architecture or genuinely hard reasoning — and prefer doing that inline. Never default to `opus`.** This file map is the authoritative orchestration declaration — Build loads it, doesn't re-derive.
 
 4. **Subagent brief discipline** (every subagent dispatch):
    - Allowed: Read, Edit, Write, Grep, Glob. Bash commands listed explicitly; `Bash: none` if not needed.
@@ -40,7 +40,7 @@ Plan document only. No code, no subagent dispatch, no implementation. Implementa
    - spec-path: the approved spec
    - plan-body-so-far: the plan content authored above this section
    - affected-files: the file map from step 3
-   - applicable-plugins: plugin ids if the change introduced engine vocabulary; empty list otherwise
+   - applicable-consumers: the consumers (extensions, callers, surfaces) a shared change must serve; empty list if the change is single-consumer
    - matrix-strictness-reference: `.claude/skills/dev-orchestrator/references/review-gates/matrix-row-strictness.md`
 
    The agent returns the matrix section as markdown. Insert it into the plan body verbatim. If the agent's return includes "does not yet exist, please add authoring task at position N" advisories, add the corresponding tasks before continuing.
@@ -51,7 +51,7 @@ Plan document only. No code, no subagent dispatch, no implementation. Implementa
    ```
    Layer must be from the verification layer set declared in `docs/TESTING.md` §Verification layers. Method must name an existing file or an explicit "create file at <path>" plan task. Done-check must be user-visible or directly observable (not "tests pass").
 
-6. **Per-plugin verification** (when spec introduced core vocabulary; applies only to projects with a declared core/extension split — see the plugin-independence gate). For every extension in the project's declared extension directory, at least one matrix row asserting the change works under that extension's config. Done-check derives from that extension's config shape. Never hardcode names not present in that directory.
+6. **Per-consumer verification** (when the spec introduces a shared capability with more than one consumer — per the abstraction & reuse audit). This is the prove-time counterpart of the audit's consumer check: the audit endorsed one core + per-consumer adapters, so each consumer's path must be exercised — the core working for one consumer does not prove another's adapter is wired correctly (producer/consumer asymmetry is the likely regression). Author at least one verification-matrix row per consumer, asserting the change works through that consumer's path. **Special case — plugin/extension architectures:** the consumers are the extensions in the project's declared extension directory; one row per extension, done-check derived from that extension's config shape; never hardcode names not present in that directory.
 
 7. **Tasks decomposed into 2-5-min steps.** Each step: exact paths, full code blocks (no "implement appropriately"), exact commands with expected output, `[ ]` checkbox prefix.
 
@@ -97,7 +97,7 @@ Plan document only. No code, no subagent dispatch, no implementation. Implementa
     - Copout grep (forbidden list above)
     - Name consistency across tasks (functions, methods, fields)
     - Matrix coverage: every spec behavior has a row?
-    - Per-plugin rows present if applicable?
+    - Per-consumer rows present if applicable?
     - **DoD per task:** `grep -c '^\*\*DoD:' <plan-file>` ≥ Task heading count.
     - **Brief path completeness:** each subagent brief block (if any) contains explicit file paths for spec/plan/code references.
 
@@ -114,7 +114,7 @@ Read the resulting reviews file. The `**Status:**` line gates progress:
 - `**Status:** approved` → proceed to step 13.
 - `**Status:** rejected` → read cited violations, fix inline, re-dispatch. Loop until approved.
 
-Reviewer applies gates: triad, placeholder-and-copout, matrix-row-strictness, forbidden-rationales. Arms-length neutrality is structural.
+Reviewer applies gates: triad, placeholder, matrix-row-strictness, forbidden-rationales. Arms-length neutrality is structural.
 </HARD-GATE>
 
 13. **Commit:** `docs: plan <topic>`. Update `docs/planning/INDEX.md`.

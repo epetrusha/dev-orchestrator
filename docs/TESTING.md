@@ -10,9 +10,11 @@ End-to-end or it didn't happen. Pick the cheapest layer that proves the user's a
 
 The layer vocabulary used by verification-matrix rows (`dev-writing-plan` step 5, `matrix-row-strictness` rule 2). Default set:
 
-`engine` (core logic) · `api` (handler/request flow) · `ui` (what the user sees/clicks) · `audit` (logs/event records) · `fs` (files on disk) · `content` (authored data/config) · `exec` (script/CLI runs) · `bootstrap` (startup/load path)
+`core` (core logic) · `api` (handler/request flow) · `ui` (what the user sees/clicks) · `audit` (logs/event records) · `fs` (files on disk) · `content` (authored data/config) · `exec` (script/CLI runs) · `bootstrap` (startup/load path)
 
-Adapt this set to your stack — e.g. swap `engine`/`content` for `db`, `queue`, `cli` — and keep this section as the single declaration; the matrix author and reviewer validate rows against the set declared here.
+Adapt this set to your stack — e.g. swap `core`/`content` for `db`, `queue`, `cli` — and keep this section as the single declaration; the matrix author and reviewer validate rows against the set declared here.
+
+Optionally declare a **layer routing** here as the project's test architecture settles — which classes of behavior belong at which layer. Once declared, matrix rows are validated against the routing too (matrix-row-strictness rule 2), and the two-step model applies as declared: one persisted proof per behavior, deduped against existing tests; a conditional live pass through real usage where the change is user-reachable.
 
 ## Prove harness
 

@@ -16,9 +16,11 @@ The pipeline (each phase is a skill the orchestrator invokes):
 - `dev-brainstorm` — idea → approved spec in `docs/planning/specs/active/`.
 - `dev-writing-plan` — approved spec → executable plan in `docs/planning/plans/active/`.
 - `dev-build` — approved plan → code, dispatching the plan's authored subagent briefs.
+- `dev-external-agent` — the build phase's external variant: approved plan → code via a named external executor; the orchestrator authors the prompt and reviews the diff.
+- `dev-driver` — alternate single-skill entry: one autonomous/external agent owns the whole pipeline end-to-end (dual-mode `auto` param; optional named external build executor).
 - `dev-session-wrap` — session-end discipline.
 
-The skills own the operational detail (checklists, review-gate dispatch, spec/plan templates, the priming and mental-model passes). This file does not duplicate it — it states the project-level rules the skills point back to.
+The skills own the operational detail (checklists, review-gate dispatch, spec/plan templates, the priming and mental-model passes); the design search itself is owned by the `dev-deliberator` agent, dispatched from brainstorm (and from the off-rails drill mid-execution). This file does not duplicate it — it states the project-level rules the skills point back to.
 
 ## Operating mode
 
@@ -78,9 +80,9 @@ The dev-* skills enforce these mechanically; this is the canonical statement of 
 
 2. **Propose → Approve → Execute.** Non-trivial changes — new files, refactors, features, data-shape changes, interface changes, planning/spec lifecycle changes — require a separate proposal pass ending in an explicit question. Execution starts only on clear assent. User questions/corrections are iterations, not approval.
 
-3. **Design checkpoint before proposing.** Redesign before presenting if: it encodes a specific case where a generic pattern exists; you have not considered a structurally different approach; you have not traced the full data flow; or the actual behavior cannot be live-verified.
+3. **Design search before proposing.** Non-trivial design comes from the `dev-deliberator` agent — structurally distinct alternatives, forward-simulation against the as-is trace, premortem, abstraction audit — never free-handed. Its checkpoint still binds every design: no specific case encoded where a generic pattern exists; a structurally different approach considered; the full data flow traced; the actual behavior live-verifiable.
 
-4. **Plan self-check before presenting.** Does the plan pass the design checkpoint? Do any decisions defer, scope out, or take the easy path without researching the true problem boundary? Do the completion criteria map to real user-action sequences, or are they easy to pass without proving the feature works?
+4. **Plan self-check before presenting.** Does the plan hold gate 3's checkpoint? Do any decisions defer, scope out, or take the easy path without researching the true problem boundary? Do the completion criteria map to real user-action sequences, or are they easy to pass without proving the feature works?
 
 5. **Live-verify before commit.** Pick the cheapest layer that proves the user's actual chain end-to-end. List the sequences to exercise, write the integration script first, and make it pass green before the feature commit lands. Exercise the actual new behavior, not an adjacent path. Tests/builds/subagent reports are supporting evidence, not verification.
 
@@ -96,11 +98,13 @@ One commit per coherent feature/fix. Before fixing anything, state: `User wants 
 
 ## Data-flow discipline
 
-Think in flows, not files.
+Think in flows, not files. Declare the project's own layer chain here — the skills read this section as the project's data-flow layers. The default shape:
 
 ```text
-source of truth → core/shared → server → transport → client → UI
+source of truth → core/shared → boundary → consumers → surface
 ```
+
+A networked app instantiates it as `source of truth → core/shared → server → transport → client → UI`; a library as `public API → core → internal`; a pipeline as `source → stage → sink`. Adapt the chain to the stack; keep this section the single declaration.
 
 When changing a data shape — a field, payload, or coordinate — grep the old shape across the whole codebase before coding. List the consumers, update each, check them off. Asymmetry between producer and consumer is the likely regression.
 
@@ -117,11 +121,12 @@ Assume the next session starts with zero context. Record gotchas as `what happen
 | Progress / backlog / shipped features | `docs/PROGRESS.md`, `docs/BACKLOG.md`, `docs/FEATURES.md` |
 | Plans / specs / handoffs / investigations | `docs/planning/INDEX.md`, then linked active files |
 | Non-obvious invariants / load-bearing facts | `docs/INVARIANTS.md` |
+| The project's generative design principles (North Star + axioms; the deliberator's `north-star-path`) | `docs/PRINCIPLES.md` |
 | What a domain term means | `docs/GLOSSARY.md` |
 | Testing posture | `docs/TESTING.md` |
 | Cross-session lessons / session audit trail | `docs/knowledge/learnings.md`, `docs/knowledge/session-history.md` |
 
-The dev-* skills also reference per-project domain docs (e.g. `MECHANICS.md`, `UI_LAYOUT.md`, `MANIFEST/`). Create those in a consuming project as the domain requires; they are not part of this base.
+The dev-* skills also reference per-project domain docs (e.g. a domain-model doc, a UI-layout doc, interface manifests/schemas). Create those in a consuming project as the domain requires; they are not part of this base.
 
 ## Knowledge base
 
@@ -142,6 +147,7 @@ Plans/specs live under `docs/planning/`. Folder placement is authoritative.
 - `plans/shipped/`, `specs/shipped/` — completed/merged; shipped plans carry `Commits: <sha>..<sha>`.
 - `plans/abandoned/`, `specs/abandoned/` — add a "why, successor" note before moving.
 - `investigations/` — `dev-investigate` findings (handoff into `dev-brainstorm`).
+- `deliberations/` — grounding digests + deliberation notes (`<slug>-grounding.md`, `<slug>-deliberation.md`): the `dev-deliberator`'s input and output per change.
 - `reviews/` — `dev-reviewer` output for specs and plans.
 - `orchestration/` — `dev-external-agent` run records + `external-agent-playbook.md` (per-run learnings).
 - `handoffs/` — append-only session notes.
@@ -173,7 +179,7 @@ When resuming: read the latest handoff first, then the paused plan. Shipped hist
 
 ### Backend/frontend phase separation
 
-Plans that touch both engine and UI declare separate backend and frontend phases, each with its own verification criteria — ideally implemented in separate sessions. The integration test script bridges the two: written during the backend phase, exercised during the frontend phase.
+Plans that touch both backend and UI declare separate backend and frontend phases, each with its own verification criteria — ideally implemented in separate sessions. The integration test script bridges the two: written during the backend phase, exercised during the frontend phase.
 
 ## Session wrap-up
 

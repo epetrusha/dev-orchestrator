@@ -7,6 +7,10 @@ description: "Use when user request needs code-reading to know what's wrong / wh
 
 Read-only diagnostic phase. Produces findings the user can decide next-phase from.
 
+<ENTRY-GUARD>
+Run only if `▸ pipeline-position: investigate (via orchestrator)` was printed above this invocation in the current session. Absent → you were reached outside the orchestrator; stop and hand back to it. You are never an entry point — the orchestrator is the only door.
+</ENTRY-GUARD>
+
 <HARD-GATE>
 No code edits, no plan-writing, no subagent dispatch while in investigate phase. Read-only.
 </HARD-GATE>
